@@ -1,0 +1,9 @@
+Transaction Malleabilty:
+
+Alice sends 1 bitcoin to Bob with a Tx id A. However, before the transaction is confirmed,
+Bob alters the signature data of the transaction to produce a new Tx id B. Having received the 1 bitcoin but with Tx id B,
+Bob then informs Alice that he has not received the bitcoin. When Alice searches a block explorer using Tx id A to confirm Bob’s claim,
+she cannot find the transaction. Assuming a failed transaction and that the 1 bitcoin was never sent, Alice sends Bob another bitcoin,
+resulting in a total of 2 bitcoins being sent to Bob.
+-> Lead to insolvency of mt.gox
+(https://www.mycryptopedia.com/transaction-malleability-explained/#:~:text=Transaction%20malleability%20is%20the%20process,to%20reference%20a%20bitcoin%20transaction.)

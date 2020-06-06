@@ -1,0 +1,28 @@
+Quelle 1: What is Segregated Witness? (https://www.mycryptopedia.com/what-is-segregated-witness/)
+
+Was ist SegWit?
+
+Kapazität wird erhöht, indem Signatur-Daten aus dem Block entfernt werden und in einen seperaten Block (Witness) verschoben werden.
+SegWit ist Soft-Fork (Backwards-Compatible)
+
+Wie funktioniert eine Transaktion? (Betrachtung Transaktion Alice -> Bob)
+
+Hat In- und Outputs
+Inputs sind die Ansammlung an vorherigen Transaktionen, bei denen der Output Alice war (Transaktionen gingen an Alice)
+Damit Alice 1 Bitcoin an Bob senden kann muss sie zuvor mindestens 1 Bitcoin erhalten haben.
+Input: 1 Bitcoin von Alice, Output: 1 Bitcoin, der danach Bob gehört
+Transaktion wird von Sender (Alice) signiert.
+Problem: Ungefähr 65% der Transaktion besteht aus Signatur-Daten
+
+Skalierungsproblem:
+Je mehr Leute Bitcoin verwenden, desto mehr Transaktionen müssen durchgeführt werden.
+Damit Transaktion durchgeführt werden kann muss sie der Blockchain hinzugefügt werden, also Platz in einem Block einnehmen.
+Blocks haben Datenlimit von 1MB (Und nur ein Block durchschnittlich alle 10 Minuten(Quelle benötigt?))
+Je mehr Transaktionen, desto mehr Speicher benötigt -> 1MB hat sich als ineffektiv für hohe Datenraten gezeigt
+Führt dazu, dass manche Nutzer Stunden bis Tage warten müssen.
+---> Je mehr Nutzer, desto längere Wartezeiten !!Problem!!
+
+Wie löst SegWit dies? (Wenn auch nur teilweise)
+Die 65% Signatur-Daten werden in einen extra Block (erweiterten Block) verschoben
+Damit mehr Platz für Transaktionen im Hauptblock
+Führt zu theoretischem Größenzuwachs von 1 MB auf 4 MB

@@ -1,0 +1,10 @@
+Genereller Aufbau
+
+Einleitung:
+Grundlagen (Transaktion, Blockbegrenzung etc.) als Begriffsdefinition 
+Probleme (Scaling Problem, Transaktion Malleability) erklären und Frage stellen, ob und wie weit diese Probleme gelöst werden von SegWit
+
+Hauptteil:
+Kapitel SegWit:
+	Beschreibung SegWit Idee und grobe Umsetzung
+	Tatsächliche Implementierung (Länge Variabel)

@@ -1,0 +1,26 @@
+Quelle 2: TXID Explained (https://www.mycryptopedia.com/txid-transaction-identifier-explained/)
+
+Aufbau Transaktionen:
+Bauen auf anderen Transaktionen auf, indem sie die "unspent transaction outputs" (UTXO) von anderen Transaktionen als Input verwenden.
+Mindestens ein In- und Output pro Transaktion
+Solange der Output nicht verwendet wird ist es ein UTXO
+-> 5 Bitcoin besitzen = 5 Bitcoin in Output(s), die noch nicht verwendet wurden
+Transaktion wird 2 mal mit SHA-256 gehasht, was die TXID ergibt.
+Kann durch transaction malleability beeinflusst werden, falls TXID vor Bestätigung des Blocks verändert wird
+-> wird durch SegWit gelöst
+Witness beschreibt in Kryptographie die Lösung eines Puzzles
+-> Hier das Verschlüsselungsskript, das bestimmte Eigenschaften erfüllen muss
+eine Signatur kann z.B. verwendet werden
+es gibt aber auch viele andere Lösungen
+-> unlocking scripts (signature script / scriptSig)
+witness muss in transaction angegeben werden, falls diese einen UTXO ausgibt
+das locking-script eines UTXO fordert, dass die witness-Daten sich im Input-Teil der Transaktion, in der der UTXO ausgegeben wird, befindet.
+
+Unterschied bei SegWit:
+witness kann auch außerhalb des Inputs stehen
+--> TXID beinhält nicht mehr die witness-Daten
+Da nur witness von außerhalb (third-party) verändert werden kann, eliminiert es die Möglichkeit von Transaction Malleability.
+Mit SegWit gibt es nun 2 IDs: die Transaction-ID und die witness-transaction-ID
+TXID ist wie vorher doppelter SHA-256 hash der Transaktion, ohne witness
+WTXID ist doppelter SHA-256 hash der Transaktion, mit neuem witness
+-> TXID unabhängig von witness -> keine Transaction-Malleability möglich

@@ -1,1 +1,14 @@
 Quelle 3: Transaction Malleability Explained (https://www.mycryptopedia.com/transaction-malleability-explained/#:~:text=Transaction%20malleability%20is%20the%20process,to%20reference%20a%20bitcoin%20transaction.)
+
+Transaction-Malleability ist der Prozess, bei dem die TXID verändert wird, indem die Signatur verändert wird
+TXID ist 32-byte string der eindeutig eine Transaktion identifiziert
+Wird erstellt, indem die Transaktionsdaten doppelt gehasht werden
+Transaktionsdaten-Aufbau (alle Daten serialisiert):
+	Transaktionshash - Referenz auf die Transaktion des Ausgegebenen UTXO
+	Output Index - ID des UTXO
+	Unlocking Script - Script zum entschlüsseln der witness
+	Unlocking Script Size - Größe des unlocking scripts in byte
+	Sequenz nummer - momentan nicht verwendet (https://developer.bitcoin.org/glossary)
+
+Was macht Transaction-Malleability möglich?
+unlocking script, oder scriptSig, kann vom angreifer verändert werden

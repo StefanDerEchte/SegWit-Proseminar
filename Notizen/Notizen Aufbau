@@ -9,12 +9,13 @@ Hauptteil:
 Kapitel transaction malleability:
 	Erklärung, wie es funktioniert
 	Angriffe verbunden damit
+	Beispiel MtGox
 Kapitel SegWit:
 	Beschreibung SegWit Idee und grobe Umsetzung
 	Tatsächliche Implementierung (Länge Variabel)
+	Folgen für Transaktion malleability
 Kapitel scaling problem:
 	Vergrößerte Blocklänge durch SegWit
-	Aktivierung des Lightning Network
 	Vergleich zu vorher (Um wie viel hat es sich gesteigert)
 
 Conclusion

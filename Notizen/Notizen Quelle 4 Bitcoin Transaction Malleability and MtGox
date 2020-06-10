@@ -1,0 +1,18 @@
+Quelle 4: Bitcoin Transaction Malleability and MtGox im Buch Computer Security - ESORICS 2014 Part 2 (file:///C:/Users/stefa/projects/SegWit-Proseminar/M%C3%B6gliche%20Quellen/2014_Book_ComputerSecurity-ESORICS2014.pdf, https://link.springer.com/chapter/10.1007/978-3-319-11212-1_18)
+Seite 313:
+
+Zentralisierte Tauschhändler (z.B. Dollar für Bitcoin) haben dezentralisiertem Bitcoin große Wertsteigerung eingebracht
+Der Erste und lange Zeit größte davon war MtGox, gegründet 2010
+
+Seite 314:
+
+Mit der Gründung anderer Tauschhändler kein Monopol mehr, aber Februar 2014 immernoch fast 70% aller Bitcoin die jemals gehandelt wurden
+Im gleichen Monat mussten sie aber den Bankrott anmelden
+-> Führte zum Verlust von 500 millionen USD Wert an Bitcoin von ihren Kunden
+Als Hauptproblem erklärten sie Transaction Malleability
+Dadurch MtGox glauben lassen Transaction sei gescheitert, wurde aber vom Netzwerk verifiziert.
+-> MtGox gibt Geld zurück und Nutzer hat sein Geld veroppelt
+
+Transaction Malleability
+Einziger Weg um Guthaben zu verändern ist mittels Transaktionen
+Transaction ID durch hashen von serialisierten Daten generiert

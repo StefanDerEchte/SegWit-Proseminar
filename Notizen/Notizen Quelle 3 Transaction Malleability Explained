@@ -12,3 +12,14 @@ Transaktionsdaten-Aufbau (alle Daten serialisiert):
 
 Was macht Transaction-Malleability möglich?
 unlocking script, oder scriptSig, kann vom angreifer verändert werden
+da unlocking script mitgehasht wird, wird transaction data verändert und dadurch die TXID
+kann nur geschehen, bevor der Block bestätigt wurde, danach nicht mehr veränderbar
+
+Am Beispiel erkennbar: kein technischer, sondern ein sozialer Angriff, da Bob Alice betrügen muss, indem er ihr sagt, er habe nichts erhalten
+
+Wurde mit SegWit behoben, indem unlocking script in witness-data verschoben wurde
+SegWit wurde am 21. Juli 2017 aktiviert
+
+MtGox: 
+Einer der größten Bitcoin Tauschhändler namens MtGox hat am 10.2.14 erklärt, dass sie transaction malleability Angriffen unterlaufen sind
+Führte später zum Bankrott

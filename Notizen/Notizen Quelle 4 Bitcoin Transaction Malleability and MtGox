@@ -15,4 +15,4 @@ Dadurch MtGox glauben lassen Transaction sei gescheitert, wurde aber vom Netzwer
 
 Transaction Malleability
 Einziger Weg um Guthaben zu verändern ist mittels Transaktionen
-Transaction ID durch hashen von serialisierten Daten generiert
+

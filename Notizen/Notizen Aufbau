@@ -3,18 +3,18 @@ Genereller Aufbau
 Einleitung:
 Grundlagen (Transaktion, Blockbegrenzung etc.) als Begriffsdefinition
 Probleme (Scaling Problem (vgl. Visa), Transaktion Malleability) erwähnen
-Frage stellen, ob und wie weit diese Probleme gelöst werden von SegWit
+Frage stellen, ob und wie weit diese Probleme gelöst werden von SegWit 
 
 Hauptteil:
-Kapitel transaction malleability:
+Kapitel transaction malleability: (recht kurz gehalten)
 	Erklärung, wie es funktioniert
 	Angriffe verbunden damit
 	Beispiel MtGox
-Kapitel SegWit:
+Kapitel SegWit: (größtes Kapitel)
 	Beschreibung SegWit Idee und grobe Umsetzung
-	Tatsächliche Implementierung (Länge Variabel)
+	Tatsächliche Implementierung (Hauptteil der Arbeit) mit Merkle Tree
 	Folgen für Transaktion malleability
-Kapitel scaling problem:
+Kapitel scaling problem: (mittlere Größe)
 	Vergrößerte Blocklänge durch SegWit
 	Vergleich zu vorher (Um wie viel hat es sich gesteigert)
 

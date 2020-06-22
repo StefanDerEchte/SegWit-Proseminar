@@ -5,7 +5,7 @@ Bauen auf anderen Transaktionen auf, indem sie die "unspent transaction outputs"
 Mindestens ein In- und Output pro Transaktion
 Solange der Output nicht verwendet wird ist es ein UTXO
 -> 5 Bitcoin besitzen = 5 Bitcoin in Output(s), die noch nicht verwendet wurden
-Transaktion wird 2 mal mit SHA-256 gehasht, was die TXID ergibt.
+Serialisierte Transaktion wird 2 mal mit SHA-256 gehasht, was die TXID ergibt.
 Kann durch transaction malleability beeinflusst werden, falls TXID vor Bestätigung des Blocks verändert wird
 -> wird durch SegWit gelöst
 Witness beschreibt in Kryptographie die Lösung eines Puzzles

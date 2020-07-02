@@ -1,0 +1,5 @@
+Quelle 5: bip-141 (https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)
+
+new witness structure -> seperate from merkle transaction tree
+only for validation, not needed for checking transaction effect
+-> scripts and signatures are moved there

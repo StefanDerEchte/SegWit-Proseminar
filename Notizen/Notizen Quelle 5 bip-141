@@ -1,5 +1,128 @@
 Quelle 5: bip-141 (https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)
 
+Abstract:
 new witness structure -> seperate from merkle transaction tree
 only for validation, not needed for checking transaction effect
 -> scripts and signatures are moved there
+extra witness tree that is nested into merkle root so it is soft fork compatible
+future hard for could place this tree in its own branch
+
+Motivation:
+all transaction's effects are determined by spends (UTXO) and new outputs
+removing witness data from the transction structure several prolems are fixed:
+	transaction malleability is solved because signature data is no longer part of transaction identification
+	prevents involuntary transaction malleability as long as all inputs are signed
+	In the case of an m-of-n CHECKMULTISIG script, a transaction is malleable only with agreement of m private key holders
+	It allows creation of unconfirmed transaction dependency chains without counterparty risk -> makes Lightning Network possible
+transmission of signature data becomes optional
+	only needed if peer is trying to validate instead of just checking existence
+	reduces size of simple payment verifications (verify if transaction happend using merkle tree)
+constraints could be bypassed with soft fork
+	size of witness ignored / discounted -> increases block size to some extent
+	maximum dat push size or sigops limit reevaluated/removed
+	new script system could be introduced
+
+Specification:
+Transacion ID:
+	new 'witness' data structure defined -> 2 IDs per transaction
+	txid unchanged -> double SHA256 of traditional serialization format ([nVersion][txins][txouts][nLockTime])
+	new wtxid -> double SHA256 of new serialization with witness data ([nVersion][marker][flag][txins][txouts][witness][nLockTime])
+	marker must be 0x00, flag must be 1-byte non-zero value (currently must be 0x01 (can be used as bitvector for future datatypes of witness data))
+	witness is serialization of all witness data of the transaction
+	each txin accosiated with a witness field.
+	witness field starts with var_int to indicate number of stack items for txin
+	each stack item starts with var_int indicating the length of it
+	non-witness program must habe empty witness field(0x00) 
+	if all txins are non-witness, wtxid = txid
+Commitment structure:
+	new bock rule requires commitment to wtxid
+	wtxid of coinbase transaction is 0x0000....0000
+	witness root hash is calculated with all thos wtxid as leaves, similar to hashMerkleRoot
+	commitment is recorded in scriptPubKey of coinbase transaction, must be at least 38 bytes with:
+		1-byte - OP_RETURN (0x6a)
+		1-byte - Push the following 36 bytes (0x24)
+		4-byte - Commitment header (0xaa21a9ed)
+		32-byte - Commitment hash: Double-SHA256(witness root hash|witness reserved value)
+  
+		39th byte onwards: Optional data with no consensus meaning
+	coinbase's input's witness must consist of a single 32-byte array for the witness reserved value
+	if there are more than one scriptPubKey matching the pattern the one with highest output index is assumed to be the commitment
+	if all transactions in a block do not have witness data, the commitment is optional.
+Witness program:
+	scriptPubKey that consists of a 1-byte push opcode followed by dat push between 2 and 40 bytes gets new meaning
+	value of first push is called 'version byte'
+	following byte vector pushed is called 'witness program'
+	two cases in which witness validation logic are triggered
+	each case determines location of witness version byte and program as well as form of scriptSig
+		1. triggered by scripPubKey being exactly a push push of version byte plus push of witness program
+		   scriptSig must be empty or validation fails ("native witness program")
+		2. triggered when scripPubKey is P2SH and redeemScript psuhed in scriptSig is push of version byte plus push of witness program
+		   scriptSig must be push of redeemScript or validation fails ("P2SH witness program")
+	version byte: 0, witness program: 20 bytes
+		interpreted as pay-to-witness-public-key-hash (P2WPKH) program
+		witness must consist of exactly 2 items: first signature, second public key
+		HASH160 of public key must match 20-byte witness program
+		after normal script evaluation, signature must be verified against public with CHECKSIG -> must result in single true on stack
+	version byte: 0, witness program: 32 bytes
+		interpreted as pay-to-witness-script-hash (P2WSH) program
+		witness must consist of an input stack feeding script, followed by serialized script (witnessScript)
+		witnessScript is popped off initial witness stack
+		SHA256 of witnessScript must match 32-byte witness program
+		witnessScript deserialiced and executed after script evaluation with remaining witness stack
+		script must not fail and result in single true on stack
+	version byte: 0, witness program neither 20 nor 32 -> script must fail
+	version byte 1 to 16 not defined yet -> reserved for future extensions
+Other consensus critical limits
+	Block size
+		Blocks limited to 1,000,000 bytes (1 MB) total size
+		change restriction with block weight
+		Block weight defined as Base size * 3 + Total size
+		Base size is block size in bytes with original serialization without witness -> as seen by non-upgraded node
+		Total size is block size in bytes with transactions serialized, including base data and witness data
+		new Rule: block weight <= 4,000,000
+	Sigops
+		Sigops per block limited to 20,000
+		changed as follows:
+		sigops in current pubkey script, signature script and P2SH check script are counted 4 times, sigop limit quadrupled to 80,000
+		P2WPKH input counted as 1 sigop
+		opcodes within P2WSH witnessScript counted identcally as previously within P2SH redeemScript
+		CHECKSIG counted as 1 sigop
+		CHECKMULTISIG counted as 1 to 20 sigops, according to it's arguments
+		applies to native witness program and P2SH witness program
+Additional definitions
+	not used for consensus limits, but suggested for language consistency
+	Transacion size calculations
+		Transacion weight defined as Base transaction size * 3 + Total transaction size (same method as calculating Block weight)
+		Virtual transaction size as Transacion weight / 4 (rounded up)
+		Base transaction size as size of transaction serialized without witness data
+		Total transaction size as transaction size in bytes serialized wizh witness data
+New script semantics
+	P2WPKH and P2WSH similar to pre-segwit script, but there are differences:
+		script spendable pre-segwit not neccesarily spendable as P2WPKH or P2WSH
+		New mining policies included in first release
+			 1. only compressed public keys in P2WPKH and P2WSH
+			 2. argument of OP_IF/NOTIF in P2WSH must be minimal
+			 3. signature(s) must be null vector(s) if an OP_CHECKSIG or OP_CHECKMULTISIG is failed (for both pre-segregated witness script and P2WSH)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

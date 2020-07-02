@@ -103,26 +103,50 @@ New script semantics
 			 1. only compressed public keys in P2WPKH and P2WSH
 			 2. argument of OP_IF/NOTIF in P2WSH must be minimal
 			 3. signature(s) must be null vector(s) if an OP_CHECKSIG or OP_CHECKMULTISIG is failed (for both pre-segregated witness script and P2WSH)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Extensible commitment structure
+	new commitment in coinbase transaction is hash of witness root hash and witness reserved value
+	witness reserved value currently no consensus meaning, but new future commitment values for soft forks
+Trust-free unconfirmed transaction dependency chain
+	segwit fixes transaction malleability -> enables building unconfirmed transaction dependency chains trust-free
+	falls lightning network genauer soll: Two parties, Alice and Bob, may agree to send certain amount of Bitcoin to a 2-of-2 multisig output (the "funding transaction"). Without signing the funding transaction, they may create another transaction, time-locked in the future, spending the 2-of-2 multisig output to third account(s) (the "spending transaction"). Alice and Bob will sign the spending transaction and exchange the signatures. After examining the signatures, they will sign and commit the funding transaction to the blockchain. Without further action, the spending transaction will be confirmed after the lock-time and release the funding according to the original contract. It also retains the flexibility of revoking the original contract before the lock-time, by another spending transaction with shorter lock-time, but only with mutual-agreement of both parties.Such setups are not possible with BIP62 as the malleability fix, since the spending transaction could not be created without both parties first signing the funding transaction. If Alice reveals the funding transaction signature before Bob does, Bob is able to lock up the funding indefinitely without ever signing the spending transaction. Unconfirmed transaction dependency chain is a fundamental building block of more sophisticated payment networks, such as duplex micropayment channel and the Lightning Network, which have the potential to greatly improve the scalability and efficiency of the Bitcoin system.
+Future extensions
+	Compact fraud proof for SPV nodes
+		bitcoin only has two security models
+			run a full node, which validates every block in the system
+			SPV, which only validates headers as proof of publication
+		whitepaper suggests that SPV may accept alerts from full-nodes -> could become DoS attack vector, because no cost for false alarm
+		-> alarm must come with fraud proof
+		proofing a fraud is not possible in these cases:
+			1. not possible to prove a miner introduces too many bitcoins in coinbase transaction without showing the whole Block and all input transactions
+			2. not possible to prove violation of block specific constraints (size, sigop limit) without showing the whole Block
+			3. not possible to prove spending of non-existing input without showing all transaction IDs way back to the genesis block
+		extra witness data allowing short proofs:
+			1. sum trees for transaction fees can be commited for short proofs that miner does not add excessive fees to coinbase transaction (same with sigop count)
+			2. backlinks for outputs spent by transaction's input consisting of block hash plus offset to easily verify that the output exists
+		these commitments could be included in extensible commitment structure through soft fork and will be transparent to nodes not knowing the new rules
+	New script system
+		segwit enables new script systems such as:
+			Schnorr signatures which reduce size of multisig transactions dramatically
+			Lamport signature which is quantum computing resistant
+			Merklized abstract syntax trees which allow very compact witness for conditional scripts with extreme complexity
+	Per-input lock-time and relative-lock-time
+		currently only one nLockTime in a transaction so all inputs must share the value
+		soft fork could introduce new per-input lock-time and relative-lock-time
+Backward compatibility
+	being a soft fork, older software will work without having to change it
+	but non-upgraded nodes will not see or validate witness data and consider witness programs as anyone-can-spend scripts
+	non-upgraded nodes should definitely upgrade, because they should always be wary of anyone-can-spend scripts
+	What a non-upgraded wallet can do:
+		recieving bitcoin from non-upgraded/upgraded wallets
+		sending bitcoin traditionally to non-upgraded/upgraded with P2PKH address
+		sending bitcoin to upgraded wallets using P2SH address
+		sending bitcoin to upgraded wallets using native witness program
+	What a non-upgraded wallet cannot do:
+		validate segregated witness transaction. It always assumes transaction is valid
+Deployment
+	BIP-141 will be deployed by 'version bits' with name 'segwit' using bit 1
+	For Bitcoin mainnet start at midnight 15.11.2016 UTC
+	timeout exactly one year later
+	
+	For Bitcoin testnet start at midnight 01.05.2016 UTC
+	timeout exactly one year later

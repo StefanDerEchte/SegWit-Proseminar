@@ -27,9 +27,14 @@ Finally the transaction has to be signed. There are multiple ways to do this, bu
 
 
 \subsection{Merkle Tree}
-
-\todo{basic principle of the merkle tree and merkle root}
-A merkle tree, or binary hash tree, is a tree, where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated and then hashed pairwise until there is only one node left, called the merkle root.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{Ausarbeitung/images/merkle_tree.png}
+    \caption{Merkle Tree\protect\footnotemark}
+    \label{fig:merkle_tree}
+\end{figure}
+\footnotetext{\url{https://www.researchgate.net/figure/An-example-of-Merkle-Tree_fig1_327601654}}
+A merkle tree, or binary hash tree as shown in \autoref{fig:merkle_tree}, is a tree, where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated and then hashed pairwise until there is only one node left, called the merkle root.
 
 
 \subsection{Blocksize limit}

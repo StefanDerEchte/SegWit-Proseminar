@@ -10,59 +10,63 @@
 %%
 %% Version 1.0, 2018-04-16
 
-\section{Transaction Malleability}
+\section{Basics}
+\label{ch:Basics}
+
+First of all the basics of Bitcoin are needed to know what exactly was changed. \todo{maybe a bit longer}
+
+\subsection{Transaction}
+\label{sec:Introduction:Basics:Transaction}
+
+\todo{transaction id, transaction ins, transactions outs (unspent transaction outs), nVersion, nLockTime}
+
+
+
+\subsection{Merkle Tree}
+
+\todo{basic principle of the merkle tree and merkle root}
+
+
+\subsection{Blocksize limit}
+\label{sec:Basics:BlocksizeLimit}
+
+\todo{limitation to 1MB blocks limiting number of transactions per second to 4, compare to visa, \dots}
+
+\subsection{Transaction Malleability}
 \label{ch:TransactionMalleability}
 
-\todo{Hierhin noch Zusammenfassung des Kapitels}
+\todo{short description with example, attack on Mt.Gox to get perspective, maybe with subsubsections}
 
-\subsection{Transaction ID}
-\label{sec:TransactionMalleability:TransactionID}
-Die Transaction ID ist als eindeutiger Identifikator für eine Transaktion gedacht. Diese wird generiert indem die Transaktion, bestehend aus unter anderem den Inputs, Outputs doppelt mit SHA-256 gehasht wird. Die Transaktionsdaten enthalten auch ein Skript, welches zur Verifizierung der Transaktion verwendet wird. Hierfür wird häufig ScriptSig verwendet, welches mithilfe von einem privaten Schlüssel die Nachricht signieren lässt und mithilfe eines öffentlichen Schlüssels die Signatur verifizieren lässt.
-
-\subsection{Problem}
-\label{sec:TransactionMalleability:Problem}
-Die Transaction Malleability ist ein Problem des Bitcoin, bei dem die Transaction ID von einer Person geändert werden kann, die nicht der Sender einer Transaktion ist. Hierfür wird genutzt, dass das Skript zur Verifizierung der Transaktion mitgehasht wird und somit direkten Einfluss auf die Transaction ID hat. Dieses Skript kann nun zum Beispiel abgeändert werden, indem eine einzige Leerzeile zum Skript hinzugefügt wird (Diese verändert nicht die Funktion des Skripts, sondern nur das Aussehen). Da bei der Hash-Funktion SHA-256 jedoch jede noch so kleine Änderung der Eingabe-Daten zu einem völlig anderen Hash als Ergebnis führt wird hierdurch die Transaction ID völlig verändert.
-
-\subsection{Angriffe und MtGox}
-\label{sec:FirstContentSection:Angriffe}
-An einem Beispiel verdeutlicht sich am besten, wie der Angriff funktioniert:
-Alice sendet Bob einen Bitcoin mittels einer Transaktion, die mit dem Bitcoin-Netzwerk geteilt wird.
-Daraufhin verfälscht Bob, der hier den Angreifer spielt, die Transaction ID unter Ausnutzung der Transaction Malleability und teilt seine selbst erstellte Transaction mit dem Netzwerk. In dieser Transaktion erhält Bob immernoch einen Bitcoin und zwar von dem selben UTXO, den Alice in ihrer Transaktion verwendet hat.
-Falls nun Bob's Transaktion akzeptiert wird, bevor die von Alice veröffentlichte Transaktion in einem neuen Block geteilt wird, dann wird Alice's Transaktion von allen Minern abgelehnt, da der verwendete UTXO in Bob's Transaktion bereits verwendet wurde.
-Darauf folgend teilt Bob Alice mit, dass die Transaktion vom Netz abgelehnt wurde, woraufhin Alice die Transaktion mit ihrer Transaction ID sucht und stellt fest, dass diese tatsächlich abgelehnt wurde. Nun sendet Alice erneut einen Bitcoin an Bob, diese Transaktion wird akzeptiert und Bob hat somit 2 Bitcoin statt einem erhalten, ohne dass Alice dies bemerkt hat. \\
-Man sieht, dass dies kein technischer, sondern ein sozialer Angriff ist, da Bob Alice dazu bringt, ihm einen 2. Bitcoin zu senden und ihn nicht direkt von ihr stiehlt. \\
-Ein bekannter Fall ist MtGox, die im Jahr 2014 der Presse erklärten, dass sie vor allem aufgrund von häufigen Angriffen, die durch Transaction Malleability möglich gemacht wurden, Bankrott gegangen sind. \cite{springer:malleability_and_mtgox}
-Noch im selben Monat des angemeldeten Bankrotts hatte MtGox fast 70\% aller bisherigen Handel mit Bitcoin abgeschlossen. \cite{springer:malleability_and_mtgox}
 
 
 \section{Segregated Witness}
 \label{ch:SegWit}
 
-\dots
+\todo{description of what segwit is}
 
 \subsection{Idee}
 \label{sec:SegWit:Idee}
 
-\dots
+\todo{describe idea of moving witness to extra data structure}
 
-\subsubsection{Backwards Compatibility}
-\label{sec:SegWit:Idee:BackwardsCompatibility}
 
-\dots
-
-\subsection{Implementierung}
+\subsection{Implementation}
 \label{sec:SegWit:Implementierung}
 
-\dots
+\todo{changes to transaction ID, witness programs functionality and script semantics, other consensus critical limits, additional definitions, commitment structure, extensible commitment structure, Backward compatibility}
 
-\subsection{Folgen für Transaction Malleability}
-\label{sec:SegWit:Folgen}
+\subsection{Consequences}
+\label{sec:SegWit:Consequences}
 
-\dots
+\todo{Fixes transaction malleability, increases blocksize limit to an extent -> no solution but rather a slight improvement}
 
-\subsection{Geschichte}
-\label{sec:SegWit:Geschichte}
+\subsection{Future possibilities}
+\label{sec:SegWit:Future}
+\todo{Trust-free unconfirmed transaction dependency chain (Lightning Network), Future extensions}
 
-\dots
+\subsection{History of Segregated Witness}
+\label{sec:SegWit:History}
 
-%\subsubsection{Unvollständige Inbetriebnahme}
+\todo{find good source for this}
+
+%\subsection{Trial of SegWit2x}

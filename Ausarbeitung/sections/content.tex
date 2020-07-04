@@ -18,24 +18,36 @@ First of all the basics of Bitcoin are needed to know what exactly was changed. 
 \subsection{Transaction}
 \label{sec:Introduction:Basics:Transaction}
 
-A Transaction is built up with a version number, transaction inputs, transaction outputs and a lock time. \\
-The version number just defines which version is used in this transaction. This can be different for different transaction. \\
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=\textwidth]{Ausarbeitung/images/transaction.png} \caption[Transaction]{Transaction\textsuperscript{1}} \small\textsuperscript{1} \url{https://thecoinrise.com/wp-content/uploads/2019/08/how-do-bitcoin-transaction-work.png}
+    \label{fig:transaction}
+\end{figure}
+Transaction is built up with a version number, transaction inputs, transaction outputs and a lock time. \\
+The version number just defines which version is used in this transaction. This can be differently for different transactions. \\
 The lock time describes when the transaction should be seen as final. Either it is empty and it should be seen as final on publication, or it has a block height or timestamp as an argument, which tells when the transaction is final. \\
 The first transaction in any block is called "coinbase" transaction and just credits a fix amount of bitcoins plus the sum of all transaction fees in the block. The transaction fees aggregate when the inputs of a transaction contain more bitcoin than the outputs. \\
-Every transaction in any block must have at least one input and at least one output. The inputs must, except in the "coinbase" transaction, refer to an output of a previous transaction which was not spent yet, called an unspent transaction output or UTXO. \\
+Every transaction in any block must have at least one input and at least one output. The inputs must, except in the "coinbase" transaction, refer to an output of a previous transaction which was not spent yet, called an unspent transaction output or UTXO. For example the first input of Tx B in \autoref{fig:transaction} refers to the first output of Tx A, which is just spent in Tx B \\
 Finally the transaction has to be signed. There are multiple ways to do this, but the signature is always, before SegWit, contained inside of a transaction.
 
 
 \subsection{Merkle Tree}
-
-\todo{basic principle of the merkle tree and merkle root}
-A merkle tree, or binary hash tree, is a tree, where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated and then hashed pairwise until there is only one node left, called the merkle root.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/merkle_tree.png}
+    \caption[Merkle Tree]{Merkle Tree\textsuperscript{2}}
+    \small\textsuperscript{2} \url{https://www.researchgate.net/figure/An-example-of-Merkle-Tree_fig1_327601654} 
+    \label{fig:merkle_tree}
+\end{figure}
+A merkle tree, or binary hash tree as shown in \autoref{fig:merkle_tree}, is a tree, where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated and then hashed pairwise until there is only one node left, called the merkle root. The merkle root would then in \autoref{fig:merkle_tree} be the "Top Hash", while 
 
 
 \subsection{Blocksize limit}
 \label{sec:Basics:BlocksizeLimit}
 
 \todo{limitation to 1MB blocks limiting number of transactions per second to 4, compare to visa, \dots}
+
+
 
 \subsection{Transaction Malleability}
 \label{ch:TransactionMalleability}

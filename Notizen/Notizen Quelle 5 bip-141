@@ -5,7 +5,7 @@ new witness structure -> seperate from merkle transaction tree
 only for validation, not needed for checking transaction effect
 -> scripts and signatures are moved there
 extra witness tree that is nested into merkle root so it is soft fork compatible
-future hard for could place this tree in its own branch
+future hard fork could place this tree in its own branch
 
 Motivation:
 all transaction's effects are determined by spends (UTXO) and new outputs
@@ -19,7 +19,7 @@ transmission of signature data becomes optional
 	reduces size of simple payment verifications (verify if transaction happend using merkle tree)
 constraints could be bypassed with soft fork
 	size of witness ignored / discounted -> increases block size to some extent
-	maximum dat push size or sigops limit reevaluated/removed
+	maximum data push size or sigops limit reevaluated/removed
 	new script system could be introduced
 
 Specification:
@@ -95,7 +95,7 @@ Additional definitions
 		Transacion weight defined as Base transaction size * 3 + Total transaction size (same method as calculating Block weight)
 		Virtual transaction size as Transacion weight / 4 (rounded up)
 		Base transaction size as size of transaction serialized without witness data
-		Total transaction size as transaction size in bytes serialized wizh witness data
+		Total transaction size as transaction size in bytes serialized with witness data
 New script semantics
 	P2WPKH and P2WSH similar to pre-segwit script, but there are differences:
 		script spendable pre-segwit not neccesarily spendable as P2WPKH or P2WSH

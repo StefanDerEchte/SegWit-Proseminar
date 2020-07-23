@@ -13,7 +13,7 @@
 \section{Basics}
 \label{ch:Basics}
 
-First of all the basics of Bitcoin are needed to know what exactly was changed. \todo{maybe a bit longer}
+In this chapter the basics needed to understand the changes made in SegWit are being explained. These consist of the way a transaction is built (\autoref{sec:Basics:Transaction}), a short explanation of merkle trees and their use (\autoref{sec:Basics:MerkleTree}), and the problems of bitcoin being the current Blocksize limit (\autoref{sec:Basics:BlocksizeLimit}) and Transaction Malleability (\autoref{sec:Basics:TransactionMalleability}). If you already know these basics you can of course skip straight to the SegWit changes (\autoref{ch:SegWit}).
 
 \subsection{Transaction}
 \label{sec:Basics:Transaction}
@@ -24,15 +24,15 @@ First of all the basics of Bitcoin are needed to know what exactly was changed. 
     \small \url{https://thecoinrise.com/wp-content/uploads/2019/08/how-do-bitcoin-transaction-work.png}
     \label{fig:transaction}
 \end{figure}
-Transaction is built up with a version number, transaction inputs, transaction outputs and a lock time. \\
-The version number just defines which version is used in this transaction. This can be differently for different transactions. \\
-The lock time describes when the transaction should be seen as final. Either it is empty and it should be seen as final on publication, or it has a block height or timestamp as an argument, which tells when the transaction is final. \\
-The first transaction in any block is called "coinbase" transaction and just credits a fix amount of bitcoins plus the sum of all transaction fees in the block. The transaction fees aggregate when the inputs of a transaction contain more bitcoin than the outputs. \\
-Every transaction in any block must have at least one input and at least one output. In \autoref{fig:transaction} Tx A has on Input and two outputs an Tx B has three inputs and one output. The inputs must, except in the "coinbase" transaction, refer to an output of a previous transaction which was not spent yet, called an unspent transaction output or UTXO. For example the first input of Tx B in \autoref{fig:transaction} refers to the first output of Tx A, which is just spent in Tx B \\
+Every transaction is built up with a version number, transaction inputs, transaction outputs and a lock time.
+The version number just defines which version is used in this transaction. This can be differently for different transactions.
+The lock time describes when the transaction should be seen as final. Either it is empty and it should be seen as final on publication, or it has a block height or timestamp as an argument, which tells when the transaction is final.
+The first transaction in any block is called "coinbase" transaction and just credits a fix amount of bitcoins plus the sum of all transaction fees in the block. The transaction fees aggregate when the inputs of a transaction contain more bitcoin than the outputs.
+Every transaction in any block must have at least one input and at least one output. In \autoref{fig:transaction} Tx A has on Input and two outputs an Tx B has three inputs and one output. The inputs must, except in the "coinbase" transaction, refer to an output of a previous transaction which was not spent yet, called an unspent transaction output or UTXO. For example the first input of Tx B in \autoref{fig:transaction} refers to the first output of Tx A, which is just spent in Tx B.
 Finally the transaction has to be signed. There are multiple ways to do this, but the signature is always, before SegWit, contained partly inside the inputs and partly inside the outputs.
 
 \subsubsection{Transaction ID}
-To broadcast a transaction into the Bitcoin network it has to be serialized first. Using this serialized data a Transaction ID, or TXID, is calculated for every transaction. This is done by using SHA-256 twice on the serialized data and the resulting hash is then used as the ID for this transaction.
+To broadcast a transaction into the Bitcoin network it has to be serialized first. Using this serialized data a Transaction ID, or TXID, is calculated for every transaction. This is done by applying double SHA-256 on the serialized data and the resulting hash is then used as the ID for this transaction.
 
 
 \subsection{Merkle Tree}
@@ -54,10 +54,11 @@ Before SegWit blocks were "limited to 1,000,000 bytes (1MB) total size" \cite{bi
 
 
 \subsection{Transaction Malleability}
-\label{ch:TransactionMalleability}
+\label{sec:Basics:TransactionMalleability}
 Since the Transaction ID is calculated by hashing the serialized data of a transaction it is influenced by the signature. There is a problem with this where an attacker can change the whole Transaction ID by changing the unlocking script in a way that does not change the way it works. For example he can just zero pad some data being used which does not change the functionality but very much changes the resulting hash. \\
 
 \subsubsection{Example of a Malleability attack}
+\label{subsec:Basics:TransactionMalleability:Attack}
 In this example Alice is the victim and Bob is the attacker. \\
 Alice sends a transaction worth one bitcoin to Bob with Transaction ID A.
 Bob now alters the Transaction ID abusing Transaction Malleability and broadcasts the same transaction but with the now different Transaction ID B.
@@ -80,13 +81,15 @@ Later they stated that the main cause for this was Transaction Malleability \cit
 \label{sec:SegWit:Idea}
 To solve the problem of Transaction Malleability the signature and unlocking script are moved into a new data structure called "witness". This way the signature will no longer effect the identification of a transaction, fixing the problem of Transaction Malleability. This new structure has its own ID called WTXID or Witness Transaction Identifier. The separation of witness data from transaction data makes the transmission of the signature data optional, as it is only used for verification of a transaction and not needed for checking its existence. \\
 Additionaly it is implemented in such a way that it is backwards compatible, meaning older versions of the Bitcoin protocol are still compatible with these new changes, and can be published as a soft fork \todo{maybe explain here}, taking away the downside of splitting the network in two. This can be accomplished even though there are many changes made, including an upgrade of the block size limit up to theoretical four megabytes. Also Segregated Witness introduces a new commitment structure making future updates simpler. \\
-Finally the fix of Transaction Malleability "allows creation of unconfirmed transaction dependency chains without counterparty risk"\cite{bip-141} like the Lightning network, providing Bitcoin to be a tool for everyday transactions. This has the potential to not only fix Transaction Malleability, but also the problem 
+Finally the fix of Transaction Malleability "allows creation of unconfirmed transaction dependency chains without counterparty risk"\cite{bip-141} like the Lightning network, providing Bitcoin to be a tool for everyday transactions. This has the potential to not only fix Transaction Malleability, but also move a big step to solve the Scalability Problem.
 
 
 \subsection{Implementation}
 \label{sec:SegWit:Implementation}
 
 \todo{changes to transaction ID, witness programs functionality and script semantics, other consensus critical limits, additional definitions, commitment structure, extensible commitment structure, Backward compatibility}
+
+
 
 \subsection{Consequences}
 \label{sec:SegWit:Consequences}

@@ -20,7 +20,7 @@ In this chapter the basics needed to understand the changes made in SegWit are b
 
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=\textwidth]{Ausarbeitung/images/transaction.png} \caption[Transaction]{Transaction}
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/transaction.png} \caption[Transaction]{Transaction}
     \small \url{https://thecoinrise.com/wp-content/uploads/2019/08/how-do-bitcoin-transaction-work.png}
     \label{fig:transaction}
 \end{figure}
@@ -44,7 +44,8 @@ To broadcast a transaction into the Bitcoin network it has to be serialized firs
     \small \url{https://en.wikipedia.org/wiki/Merkle_tree#/media/File:Hash_Tree.svg} 
     \label{fig:merkle_tree}
 \end{figure}
-A merkle tree, or binary hash tree as shown in \autoref{fig:merkle_tree} is a tree where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated and then hashed pairwise until there is only one node left, called the merkle root. In \autoref{fig:merkle_tree} the merkle root is called "top hash", while L1 through L4 represent the leaves and thus transactions of the corresponding block.
+A merkle tree, or binary hash tree as shown in \autoref{fig:merkle_tree} is a tree where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated and then hashed pairwise until there is only one node left, called the merkle root. In \autoref{fig:merkle_tree} the merkle root is called "top hash", while L1 through L4 represent the leaves and thus transactions of the corresponding block. \\
+
 
 
 \subsection{Blocksize limit}
@@ -70,6 +71,9 @@ Now Alice sends the transaction again resulting in a double spend where Bob rece
 One of the biggest bitcoin exchange points ever, which in February 2014 "still accounted for close to 70\% of all bitcoins ever traded" \cite{springer:malleability_and_mtgox}, had to file for bankruptcy in the same month resulting in "the loss of over 500 million USD worth of bitcoins owned by its customers" \cite{springer:malleability_and_mtgox}. \\
 Later they stated that the main cause for this was Transaction Malleability \cite{springer:malleability_and_mtgox}.
 
+\subsection{Soft Fork}
+\label{sec:Basics:SoftFork}
+To prevent a spl
 
 
 \section{Segregated Witness}
@@ -88,6 +92,8 @@ Finally the fix of Transaction Malleability "allows creation of unconfirmed tran
 \label{sec:SegWit:Implementation}
 
 \todo{changes to transaction ID, witness programs functionality and script semantics, other consensus critical limits, additional definitions, commitment structure, extensible commitment structure, Backward compatibility}
+
+
 
 
 

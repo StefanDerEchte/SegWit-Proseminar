@@ -32,35 +32,41 @@ Every transaction in any block must have at least one input and at least one out
 Finally the transaction has to be signed. There are multiple ways to do this, but the signature is always, before SegWit, contained partly inside the inputs and partly inside the outputs.
 
 \subsubsection{Transaction ID}
-To broadcast a transaction into the Bitcoin network it has to be serialized first. Using this serialized data a Transaction ID, or TXID, is calculated for every transaction. This is done by applying double SHA-256 on the serialized data and the resulting hash is then used as the ID for this transaction.
+To broadcast a transaction into the Bitcoin network it has to be serialized first. Using this serialized data a Transaction ID, or TXID, is calculated for every transaction. This is done by applying double SHA-256 on the serialized data and the resulting hash is then used as the ID for this transaction. This is explained further in \autoref{sec:SegWit:Implementation}.
 
 
 \subsection{Merkle Tree}
 \label{sec:Basics:MerkleTree}
 \begin{figure}[!ht]
     \centering
-    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/merkle_tree.png}
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/MerkleTree.png}
     \caption[Merkle Tree]{Merkle Tree}
-    \small \url{https://en.wikipedia.org/wiki/Merkle_tree#/media/File:Hash_Tree.svg} 
+    \small \url{https://101blockchains.com/wp-content/uploads/2020/05/bitcoin-merkle-transctions.png} 
     \label{fig:merkle_tree}
 \end{figure}
-A merkle tree, or binary hash tree as shown in \autoref{fig:merkle_tree} is a tree where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated and then hashed pairwise until there is only one node left, called the merkle root. In \autoref{fig:merkle_tree} the merkle root is called "top hash", while L1 through L4 represent the leaves and thus transactions of the corresponding block. \\
+A merkle tree, or binary hash tree as shown in \autoref{fig:merkle_tree} is a tree where all the leaves, in the case of bitcoin the leaves are the transactions of a block, are concatenated and then hashed pairwise. This results in a new layer of nodes, which are then again concatenated pairwise and then hashed until there is only one node left, called the merkle root. In \autoref{fig:merkle_tree} the merkle root is called "root hash" and is stored inside the block header, while Tx0 through Tx3 represent the leaves and thus transactions of the corresponding block. As previously described, these transactions are first hashed, resulting in Hash0 through Hash3. Then they are concatenated pairwise and hashed resulting in Hash01 and Hash23. Repeating this process once more this results in the Root Hash. 
+
+The advantage of having a merkle tree is being able to verify quickly if for example Tx3 is contained inside of the block. To do so it is no longer needed to request all transactions of this block by a full bitcoin node, but rather just Hash 2 and Hash01. Of course the block header should be stored locally. To verify if Tx3 is stored inside of this block you need to just calculate Hash3 and together witch Hash2 calculate Hash23 and finally using Hash01 calculate the Root Hash. If this is the same as your locally stored Root Hash you can be sure to assume the transaction (here Tx3) is inside of this block. A more graphic representation of this example can be seen in \autoref{fig:merkle_tree}.
 
 
 
 \subsection{Blocksize limit}
 \label{sec:Basics:BlocksizeLimit}
-Before SegWit blocks were "limited to 1,000,000 bytes (1MB) total size" \cite{bip-141}. This and the fact that there is only supposed to be one new block ever ten minutes \cite{nakamoto} results in a limit of about 4.6 transactions per second\footnote{can be seen on \url{https://www.blockchain.com/charts/transactions-per-second}}\cite{hackernoon}. Compared to Visa's 1,700 transactions per second \cite{hackernoon} it is obvious that at this state Bitcoin cannot work on a large scale as it simply cannot handle enough transactions.
+Before SegWit blocks were "limited to 1,000,000 bytes (1MB) total size" \cite{bip-141}. This and the fact that there is only supposed to be one new block ever ten minutes \cite{nakamoto} results in a limit of about 7 transactions per second\footnote{can be seen on \url{https://www.blockchain.com/charts/transactions-per-second}} \cite{hackernoon}.
+The theoretical limit can be calculated and is 27 transactions per second \cite{transaction_limit}. But to achieve these 27 transactions per second you have to only use minimal transactions.
+Compared to Visa's 1,700 transactions per second \cite{hackernoon} it is obvious that at this state Bitcoin cannot work on a large scale as it simply cannot handle enough transactions.
+
+An important note is, that most of the space inside of a transaction is used up by its signature data. How this is used as an advantage will be discussed in \autoref{sec:SegWit:Implementation}.
 
 
 
 \subsection{Transaction Malleability}
 \label{sec:Basics:TransactionMalleability}
-Since the Transaction ID is calculated by hashing the serialized data of a transaction it is influenced by the signature. There is a problem with this where an attacker can change the whole Transaction ID by changing the unlocking script in a way that does not change the way it works. For example he can just zero pad some data being used which does not change the functionality but very much changes the resulting hash. \\
+Since the Transaction ID is calculated by hashing the serialized data of a transaction it is influenced by the signature. There is a problem with this where an attacker can change the whole Transaction ID by changing the unlocking script in a way that does not change the way it works. For example he can just zero pad some data being used which does not change the functionality but very much changes the resulting hash.
 
 \subsubsection{Example of a Malleability attack}
 \label{subsec:Basics:TransactionMalleability:Attack}
-In this example Alice is the victim and Bob is the attacker. \\
+In this example Alice is the victim and Bob is the attacker.
 Alice sends a transaction worth one bitcoin to Bob with Transaction ID A.
 Bob now alters the Transaction ID abusing Transaction Malleability and broadcasts the same transaction but with the now different Transaction ID B.
 Now Bob is lucky as the transaction with ID B is confirmed before the one with ID A is. Since the UTXO used as input in both transactions is the same, the transaction with Transaction ID A is being declined.
@@ -73,7 +79,15 @@ Later they stated that the main cause for this was Transaction Malleability \cit
 
 \subsection{Soft Fork}
 \label{sec:Basics:SoftFork}
-To prevent a spl
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/Softfork.png}
+    \caption[Soft Fork]{Soft Fork}
+    \small \url{https://wiki.trezor.io/images/Softfork.png} 
+    \label{fig:soft_fork}
+\end{figure}
+To avoid a split in the block chain like a hard fork does, a soft fork still fulfills the old rules used before the update. This way old nodes will still accept transactions following the new rules, because they still have to fulfill the old rules, as seen in \autoref{fig:soft_fork}, but the new nodes do not necessarily accept old transactions.
+Thus there is no downside to updating, but at the same time it is not necessary to do so. In the special case of SegWit old transactions will still be valid, this will be further explained in \autoref{sec:SegWit:Idea}.
 
 
 \section{Segregated Witness}
@@ -83,17 +97,94 @@ To prevent a spl
 
 \subsection{Idea}
 \label{sec:SegWit:Idea}
-To solve the problem of Transaction Malleability the signature and unlocking script are moved into a new data structure called "witness". This way the signature will no longer effect the identification of a transaction, fixing the problem of Transaction Malleability. This new structure has its own ID called WTXID or Witness Transaction Identifier. The separation of witness data from transaction data makes the transmission of the signature data optional, as it is only used for verification of a transaction and not needed for checking its existence. \\
-Additionaly it is implemented in such a way that it is backwards compatible, meaning older versions of the Bitcoin protocol are still compatible with these new changes, and can be published as a soft fork \todo{maybe explain here}, taking away the downside of splitting the network in two. This can be accomplished even though there are many changes made, including an upgrade of the block size limit up to theoretical four megabytes. Also Segregated Witness introduces a new commitment structure making future updates simpler. \\
-Finally the fix of Transaction Malleability "allows creation of unconfirmed transaction dependency chains without counterparty risk"\cite{bip-141} like the Lightning network, providing Bitcoin to be a tool for everyday transactions. This has the potential to not only fix Transaction Malleability, but also move a big step to solve the Scalability Problem.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/SegWitTransactionChanges.png}
+    \caption[Witness Data]{Witness Data}
+    \small \url{https://www.buybitcoinworldwide.com/pages/info/img/segwit-v-legacy.png} 
+    \label{fig:segwit_transaction}
+\end{figure}
+To solve the problem of Transaction Malleability the signature and unlocking script are moved into a new data structure called "witness". This way the signature will no longer affect the identification of a transaction, fixing the problem of Transaction Malleability. In \autoref{fig:segwit_transaction} you can see, that the \textit{scriptSig} in the original transaction block is now empty and the \textit{scriptSig} of the corresponding input is moved into the new witness structure. This new structure has its own ID called WTXID or Witness Transaction Identifier. The separation of witness data from transaction data makes the transmission of the signature data optional, as it is only used for verification of a transaction and not needed for checking its existence.
+
+Additionaly it is implemented in such a way that it is backwards compatible, meaning older versions of the Bitcoin protocol are still compatible with these new changes, and can be published as a soft fork, taking away the downside of splitting the network in two. This can be accomplished even though there are many changes made, including an upgrade of the block size limit up to theoretical four megabytes. Also Segregated Witness introduces a new commitment structure making future updates simpler.
+
+Finally the fix of Transaction Malleability "allows creation of unconfirmed transaction dependency chains without counterparty risk" \cite{bip-141} like the Lightning network, providing Bitcoin to be a tool for everyday transactions. This has the potential to not only fix Transaction Malleability, but also move a big step to solve the Scalability Problem.
 
 
 \subsection{Implementation}
 \label{sec:SegWit:Implementation}
 
 \todo{changes to transaction ID, witness programs functionality and script semantics, other consensus critical limits, additional definitions, commitment structure, extensible commitment structure, Backward compatibility}
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/witnesstxid.png}
+    \caption[Calculation of TXID and WTXID]{Calculation of TXID and WTXID}
+    \small \url{https://raw.githubusercontent.com/bitcoin/bips/master/bip-0144/witnesstx.png} 
+    \label{fig:transaction_ids}
+\end{figure}
+To implement the new witness we need to define what belongs to this structure. 
+To begin with nVersion marks as the name says the version of SegWit. The current version is version zero and all of the following changes, especially witness programs in \autoref{subsec:SegWit:Implementation:WitnessPrograms}, will refer to version zero. The versions one to sixteen are reserved for future updates and there is no further interpretation of the witness program or the witness stack defined yet.
+After the version there is a marker which must be a one-byte zero value, as you can see in \autoref{fig:transaction_ids}. "The marker byte is set to zero so that this structure will never parse as a valid transaction in a parser that does not support this BIP" \cite{bip-144}. Not having the marker byte "would lead to empty transactions (no inputs, no outputs, which are used in some tests) to be interpreted as new serialized data" \cite{bip-144}. This of course would lead to errors.
+Thirdly the flag byte must be a one byte non-zero value. "Currently, 0x01 MUST be used" \cite{bip-141}. This flag "can be interpreted as a bitvector" \cite{bip-144} and provides space for future extensions to differentiate between witness types.
+After the flag come the transaction inputs, each "associated with a witness field" \cite{bip-141}. The count of these is defined by the variable txin\_count. The number of script\_witnesses is thus also implied by the txin\_count. If a transaction is a non-witness transaction it must have an one byte zero value as its associated witness field. The inputs used for calculating the Transaction ID are the same used for calculating the witness ID. 
+Same goes for the outputs used for the calculations. The outputs of course show how much of the inputs should be sent to whom.
+Probably the most interesting part, the witness part you can see in \autoref{fig:transaction_ids}, will mostly be explained later, as it is more complicated than the rest.
+Finally the last part used to calculate the Witness ID is nLockTime, which is the same as described in \autoref{sec:Basics:Transaction}. It is there if you do want the changes to be committed to the block chain at a certain point in the future.
+
+\subsubsection{Witness Root Hash}
+\label{subsec:SegWit:Implementation:WitnessRootHash}
+To provide the same benefits of a merkle tree, as mentioned in \autoref{sec:Basics:MerkleTree}, to the new witness structure it gets its own merkle tree.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/SegWitMerkleTree.png}
+    \caption[Witness Merkle Tree]{Witness Merkle Tree}
+    \small \url{https://blog.bitmex.com/wp-content/uploads/2020/01/ASICBOOST_Allegation5-906x1024.png} 
+    \label{fig:segwit_merkle_tree}
+\end{figure}
+This tree is built like the normal merkle tree, but has the Witness IDs defined in \autoref{sec:SegWit:Implementation}, rather than just the Transaction IDs, as its leaves. As the coinbase transaction does not have witness data, its Witness ID "is assumed to be 0x0000....0000" \cite{bip-141}, or in other words is zero.
+As you can see in \autoref{fig:segwit_merkle_tree} the resulting witness root hash is not saved in the block header. That is the case, because changes to the block header would remove the ability to publish this update as a soft fork. Instead the witness root hash is stored inside a new structure named commitment structure, which has its place inside of the coinbase transaction.
+
+\subsubsection{Commitment Structure}
+\label{subsec:SegWit:Implementation:CommitmentStructure}
+The new commitment "is recorded in a \textit{scriptPubKey} of the coinbase transaction" \cite{bip-141} and must be at least 38 bytes and is defined as in \autoref{fig:commitment_structure}.
+\begin{figure}[!ht]
+    \centering
+    \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/CommitmentStructure.png}
+    \caption[Commitment Structure]{Commitment Structure}
+    \small \url{https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki} 
+    \label{fig:commitment_structure}
+\end{figure}
+The first six byte must be 0x6a24aa21a9ed \cite{bip-141}. The following 32 bytes are the result of hashing a new witness reserved value concatenated to the witness root hash. This new witness reserved value "currently has no consensus meaning, but in the future allows new commitment values for future softforks" \cite{bip-141}. Also if there are multiple \textit{scriptPubKey}s matching this pattern then the \textit{scriptPubKey} with the highest output index is considered as the commitment, although it should rarely happen that multiple \textit{scriptPubKey}s match this pattern.
 
 
+\subsubsection{Witness Programs}
+\label{subsec:SegWit:Implementation:WitnessPrograms}
+A new program to handle witness data is introduced in BIP-141. This program is triggered if \textit{scriptPubKey} is a script that consists of firstly a one byte push opcode, called the 'version byte', and then a two to forty byte data push, called the 'witness program'. Also a new validation logic is introduced with two ways to trigger it:
+\begin{enumerate}
+    \item The \textit{scriptPubKey} has to be exactly a push of a version byte and after that a push of the witness program. Meanwhile the \textit{scriptSig} has to be empty. This is called 'native witness program'.
+    \item The \textit{scriptPubKey} has to be a P2SH script (as defined in BIP-16). The belonging \textit{redeem script} has to be a push of a version byte plus a push of a witness program. Additionaly the \textit{redeem script} must be pushed into the \textit{scriptSig}.
+\end{enumerate}
+
+In the following only the witness programs with version zero defined in BIP-141 are going to be discussed. The first one is called 'pay-to-witness-public-key-hash' (P2WPKH) while the second is called 'pay-to-witness-script-hash' (P2WSH). To begin with P2WPKH
+\begin{itemize}
+    \item the version byte must be zero and the witness program must be 20 bytes,
+    \item the witness must have exactly two contents, first the signature and then the public key, where both of these have to be at max 520 bytes each,
+    \item the witness program must be the HASH160 of the public key,
+    \item if the script is correct, "the signature is verified against the public key with CHECKSIG operation" \cite{bip-141}.
+\end{itemize}
+
+For example this is how a version zero native P2WPKH has to look:
+\begin{itemize}
+    \item witness: <signature> <pubkey>
+    \item scriptSig: (empty)
+    \item scriptPubKey: <version: 0> <HASH160 of pubkey>
+\end{itemize}
+
+Secondly for P2WSH
+\begin{enumerate}
+    \item the version byte must be zero and the witness program must be 32 bytes,
+    \item The witness must consist of an input stack for the following script and secondly a serialized script, called witness script
+\end{enumerate}
 
 
 

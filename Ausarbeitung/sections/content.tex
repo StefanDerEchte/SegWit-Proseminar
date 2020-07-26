@@ -32,7 +32,7 @@ Every transaction in any block must have at least one input and at least one out
 Finally the transaction has to be signed. There are multiple ways to do this, but the signature is always, before SegWit, contained partly inside the inputs and partly inside the outputs.
 
 \subsubsection{Transaction ID}
-To broadcast a transaction into the Bitcoin network it has to be serialized first. Using this serialized data a Transaction ID, or TXID, is calculated for every transaction. This is done by applying double SHA-256 on the serialized data and the resulting hash is then used as the ID for this transaction. This is explained further in \autoref{sec:SegWit:Implementation}.
+To broadcast a transaction into the Bitcoin network it has to be serialized first. Using this serialized data a Transaction ID, or TXID, is calculated for every transaction. This is done by applying double SHA256 on the serialized data and the resulting hash is then used as the ID for this transaction. This is explained further in \autoref{sec:SegWit:Implementation}.
 
 
 \subsection{Merkle Tree}
@@ -52,7 +52,7 @@ The advantage of having a merkle tree is being able to verify quickly if for exa
 
 \subsection{Blocksize limit}
 \label{sec:Basics:BlocksizeLimit}
-Before SegWit blocks were "limited to 1,000,000 bytes (1MB) total size" \cite{bip-141}. This and the fact that there is only supposed to be one new block ever ten minutes \cite{nakamoto} results in a limit of about 7 transactions per second\footnote{can be seen on \url{https://www.blockchain.com/charts/transactions-per-second}} \cite{hackernoon}.
+Before SegWit blocks were "limited to 1,000,000 bytes (1MB) total size" \cite{bip-141}. This and the fact that there is only supposed to be one new block ever ten minutes \cite{nakamoto} results in an average of about 4.6 transactions per second\footnote{can be seen on \url{https://www.blockchain.com/charts/transactions-per-second}} \cite{hackernoon}.
 The theoretical limit can be calculated and is 27 transactions per second \cite{transaction_limit}. But to achieve these 27 transactions per second you have to only use minimal transactions.
 Compared to Visa's 1,700 transactions per second \cite{hackernoon} it is obvious that at this state Bitcoin cannot work on a large scale as it simply cannot handle enough transactions.
 
@@ -106,7 +106,7 @@ Thus there is no downside to updating, but at the same time it is not necessary 
 \end{figure}
 To solve the problem of Transaction Malleability the signature and unlocking script are moved into a new data structure called "witness". This way the signature will no longer affect the identification of a transaction, fixing the problem of Transaction Malleability. In \autoref{fig:segwit_transaction} you can see, that the \textit{scriptSig} in the original transaction block is now empty and the \textit{scriptSig} of the corresponding input is moved into the new witness structure. This new structure has its own ID called WTXID or Witness Transaction Identifier. The separation of witness data from transaction data makes the transmission of the signature data optional, as it is only used for verification of a transaction and not needed for checking its existence.
 
-Additionaly it is implemented in such a way that it is backwards compatible, meaning older versions of the Bitcoin protocol are still compatible with these new changes, and can be published as a soft fork, taking away the downside of splitting the network in two. This can be accomplished even though there are many changes made, including an upgrade of the block size limit up to theoretical four megabytes. Also Segregated Witness introduces a new commitment structure making future updates simpler.
+Additionaly it is implemented in such a way that it is backward compatible, meaning older versions of the Bitcoin protocol are still compatible with these new changes, and can be published as a soft fork, taking away the downside of splitting the network in two. This can be accomplished even though there are many changes made, including an upgrade of the blocksize limit up to theoretical four megabytes. Also Segregated Witness introduces a new commitment structure making future updates simpler.
 
 Finally the fix of Transaction Malleability "allows creation of unconfirmed transaction dependency chains without counterparty risk" \cite{bip-141} like the Lightning network, providing Bitcoin to be a tool for everyday transactions. This has the potential to not only fix Transaction Malleability, but also move a big step to solve the Scalability Problem.
 
@@ -114,7 +114,6 @@ Finally the fix of Transaction Malleability "allows creation of unconfirmed tran
 \subsection{Implementation}
 \label{sec:SegWit:Implementation}
 
-\todo{changes to transaction ID, witness programs functionality and script semantics, other consensus critical limits, additional definitions, commitment structure, extensible commitment structure, Backward compatibility}
 \begin{figure}[!ht]
     \centering
     \includegraphics[width=(\textwidth * 2 / 3 )]{Ausarbeitung/images/witnesstxid.png}
@@ -170,36 +169,57 @@ In the following only the witness programs with version zero defined in BIP-141 
     \item the version byte must be zero and the witness program must be 20 bytes,
     \item the witness must have exactly two contents, first the signature and then the public key, where both of these have to be at max 520 bytes each,
     \item the witness program must be the HASH160 of the public key,
-    \item if the script is correct, "the signature is verified against the public key with CHECKSIG operation" \cite{bip-141}.
+    \item and if the script is correct, "the signature is verified against the public key with CHECKSIG operation" \cite{bip-141}.
 \end{itemize}
 
 For example this is how a version zero native P2WPKH has to look:
 \begin{itemize}
     \item witness: <signature> <pubkey>
     \item scriptSig: (empty)
-    \item scriptPubKey: <version: 0> <HASH160 of pubkey>
+    \item scriptPubKey: <version: 0> <HASH160 of pubkey> \cite{bip-141}
 \end{itemize}
+The signature is then verified as <signature> <pubkey> CHECKSIG.
 
 Secondly for P2WSH
-\begin{enumerate}
+\begin{itemize}
     \item the version byte must be zero and the witness program must be 32 bytes,
-    \item The witness must consist of an input stack for the following script and secondly a serialized script, called witness script
-\end{enumerate}
+    \item the witness must consist of an input stack for the following script and secondly a serialized script, called 'witnessScript', which has a size limit of 10000 bytes,
+    \item and the witness program must be the SHA256 hash of this witnessSript.
+\end{itemize}
+the witnessScript is then popped off the stack, deserialized and executed with the remaining stack. This must result in a single TRUE on the stack. For example this is how a version zero native P2WPKH might look (here the witnessScript is an one-of-two multi-signature):
+\begin{itemize}
+    \item witness: 0 <signature1> <1 <pubkey1> <pubkey2> 2 CHECKMULTISIG>
+    \item scriptSig: (empty)
+    \item scriptPubKey: <version: 0> <SHA256 hash of witnessScript> \cite{bip-141}
+\end{itemize}
+the witnessScript (1 <pubkey1> <pubkey2> 2 CHECKMULTISIG) is then popped off and its SHA256 hash compared against the witness program. Afterwards it is deserialiced and executed with the remaining stack inside the witness: 0 <signature1> 1 <pubkey1> <pubkey2> 2 CHECKMULTISIG \cite{bip-141}.
 
+If the version byte is set to zero, but the length of the witness program is neither equal to 20-bytes nor to 32-bytes, the script will fail. But if the second data push, here considered to be the witness program, is longer than 40 bytes it will no longer be assumed to be and witness program and thus will pass.
+
+\subsubsection{Block Weight}
+\label{subsec:SegWit:Implementation:BlockWeight}
+Another big problem that is tried to be solved by SegWit is the scalability problem. As mentioned in \autoref{sec:Basics:BlocksizeLimit} the blocks were limited to 1MB and thus could not handle more than a maximum of 27 transactions per second \cite{transaction_limit}. One way to increase this limit is to raise the blocksize limit. To do so, a new rule using 'block weight' is defined. To calculate the block weight the 'base size' and the 'total size' are needed. The base size is the sum of all serialized data inside a block needed to calculate the Transaction ID and the total size is the sum of all serialized data inside a block needed to calculate the Witness ID. This also includes the data used to calculate the base size. The serialized data needed to calculate these can be seen in \autoref{fig:transaction_ids}. The formula used to calculate the block weight is defined as
+\begin{equation*}
+    3 * base size + 1 * total size = block weight.
+\end{equation*}
+The new rule added is \textit{block weight $\leq$ 4,000,000 bytes}.
+If a block does not have any SegWit transactions the base size is equal to the total size meaning the formula would be $4 * base size = block weight$ and would result in the old rule that the block cannot be larger than 1MB. So again this change is backward compatible, making a soft fork possible. This change is not just backward compatible, but also makes it possible to have blocks of almost four times the old size of 1MB, as a block which has almost all of its contents inside the witness block has the rule to be at maximum the size of four megabytes. This will of course require very weird transactions, where most data is inside of the witness. But with normal transactions "[t]he average SegWit block size will be roughly 2MB" \cite{segwit_transaction_limit}.
+
+\subsubsection{Sigop Limit}
+\label{subsec:SegWit:Implementation:SigopLimit}
+The number of sigops in each block "is currently limited to 20,000" \cite{bip-141}. Similar to the introduction of block weight discussed in \autoref{subsec:SegWit:Implementation:BlockWeight} the old limit is "quadrupled to $\leq$ 80,000" \cite{bip-141} and the sigops that can be used before segwit, namely "the current pubkey script, signature script, and P2SH check script are counted at 4 times their previous value" \cite{bip-141}. Again for old nodes the limit is not affected, as the number of sigops they can see will not surpass 20,000. To still raise the limit for new nodes every "P2WPKH input is counted as 1 sigop" \cite{bip-141} and every opcode inside of a P2WSH script will be counted like it was before SegWit. So every CHECKSIG is counted once and "CHECKMULTISIG is counted as 1 to 20 sigops according to the arguments" \cite{bip-141}.
 
 
 \subsection{Consequences}
 \label{sec:SegWit:Consequences}
-
-\todo{Fixes transaction malleability, increases blocksize limit to an extent -> no solution but rather a slight improvement}
+As already mentioned in \autoref{sec:SegWit:Idea} the main problem fixed by Segregated Witness is Transaction Malleability. It is no longer possible for a third party to create a duplicate of a transaction with another ID. Also SegWit takes a shot at fixing the scalability problem directly by raising the technical block size. The problem is that this is not a solution to the problem but rather a slight improvement as it just raises the blocksize limit by a static value and does not give Bitcoin a way to scale into the future.
 
 \subsection{Future possibilities}
 \label{sec:SegWit:Future}
+A nice side effect to fixing Transaction Malleability is that it "enables the building of unconfirmed transaction dependency chains in a trust-free manner" \cite{bip-141}. This allows for a new technology to work with bitcoin called the 'Lightning Network'. This new technology could solely fix the scalability problem as it is an off-chain solution that could be able to process up to one million transactions per second. 
 \todo{Trust-free unconfirmed transaction dependency chain (Lightning Network), Future extensions}
 
 \subsection{History of Segregated Witness}
 \label{sec:SegWit:History}
 
 \todo{find good source for this}
-
-%\subsection{Trial of SegWit2x}
